@@ -10,7 +10,7 @@ import tensorflow as tf
 def get_image_pixels ( file_path ) :
     """
         input: jpg file path
-        output: jpg normalized pixels as np array
+        output: jpg normalized pixels
     """
 
     # load the image
@@ -41,9 +41,11 @@ def get_jpg_filename(num):
         return str(num)
 
 #jpg files path
-jpg_path = './Datasets/lfwa_img_dirs'
+jpg_path = 'C:\\Users\\rtrag\\Desktop\\DataScience\\BGU\\semester1_spring_2019\\DeepLearning\\Assignments\\Assignment2\\lfwa\\lfw2\\lfw2'
+#jpg_path = './Datasets/lfwa_img_dirs'
 directory = os.fsencode(jpg_path)
 
+####################3check if we need to delte the following for loop
 for folder in os.listdir(directory):
     folder_person_path = join(directory, folder)
     folder_person_path_name = os.fsdecode(folder_person_path)
@@ -53,26 +55,25 @@ for folder in os.listdir(directory):
         # print(file_pixels)
 
 
-""" X and Y are np arrays. 
-    X[0] holds person a pixles X[1] holds person b pixles Y holds the lable. 
-    All match the index (represents pair id)
+""" X and Y are dictionaries
+    X: Each pair has key: id and dictionary with the pair
+    pair dictionary has key:name and value:pixles
+    Y: dictionary with key: id and value: 1 (match) or 0(not match)
 """
-def preprocess_data(directory, txt_files_path, file_name):
+def preprocess_data(directory, df):
     """ input: directory-jpg file directory
                txt_files_path-train and test txt files path
     """
     #convert float numbers of the 4th column (exist to no match pairs) to int and all nan to '-1'
-    path_txt = join(txt_files_path, file_name)
-    df = pd.read_csv(path_txt, names=['col1', 'col2', 'col3', 'col4'], skiprows=1, sep='\t')
-    df['col4'].fillna(-1, inplace=True)
-    df['col4'] = df['col4'].astype('int64')
-    list_names = []
+    # path_txt = join(txt_files_path, file_name)
+    # df = pd.read_csv(path_txt, names=['col1', 'col2', 'col3', 'col4'], skiprows=1, sep='\t')
+    # df['col4'].fillna(-1, inplace=True)
+    # df['col4'] = df['col4'].astype('int64')
     pairs = df.shape[0]
     X = [np.zeros((pairs, 250, 250, 1)) for i in range (2)]
     Y = np.zeros((pairs, 1))
 
     for index, row in df.iterrows():
-        list_names.append (row['col1'])
         if str(row['col4']) == '-1':
             pix1 = join(directory, os.fsencode(row['col1']))
             pix1_num = row['col1'] + '_' + get_jpg_filename(str(row['col2'])) + '.jpg'
@@ -106,21 +107,144 @@ def preprocess_data(directory, txt_files_path, file_name):
 
             Y[index] = 0
 
-    set_names = set(list_names)
     return ("finish_data_processing", X,Y)
 
-txt_files_path = './Datasets/pairs'
+def list_names_df(txt_files_path, file_name):
+    path_txt = join(txt_files_path, file_name)
+    df = pd.read_csv(path_txt, names=['col1', 'col2', 'col3', 'col4'], skiprows=1, sep='\t')
+    df['col4'].fillna(-1, inplace=True)
+    df['col4'] = df['col4'].astype ('int64')
+    return df
+
+def find_paired(parent_index, name, set_names, df):
+    for row,index in df.iterrows():
+        if (index>parent_index):
+            if (row['col1'] == name):
+                set_names.add(['col3'])
+            elif (row['col3'] == name):
+                set_names.add(row['col1'])
+    return index, set_names
+
+def split_train(txt_files_path, file_name):
+    df = list_names_df(txt_files_path, file_name)
+    val_num = round(0.2*len(df))
+    train_num = round(len(df)-val_num)
+    set_val_names = set()
+    set_train_names = set()
+    set_names = set()
+    for index, row in df.iterrows():
+        rand = random.random()
+        if train_num <= 0:
+            continue
+        elif val_num <= 0:
+            continue
+        else:
+            if (rand <= 0.2):
+                if row['col1'] not in set_val_names or row['col1'] not in set_train_names:
+                    set_names.add(row['col1'])
+                    if row['col4'] != -1 :
+                        index_sub = 0
+                        while (index_sub < 2199) :
+                            index_sub, set_names = find_paired (index, row['col1'], set_names, df)
+                            val_num -= len(set_names)
+                            set_val_names.update(set_names)
+                    else :
+                        val_num -= len(set_names)
+                        set_val_names.update(set_names)
+            else:
+                if row['col1'] not in set_val_names or row['col1'] not in set_train_names:
+                    set_names.add(row['col1'])
+                    if row['col4'] != -1:
+                        index_sub = 0
+                        while (index_sub < 2199):
+                            index_sub, set_names = find_paired(index, row['col1'], set_names, df)
+                            train_num -= len(set_names)
+                            set_train_names.update(set_names)
+                    else :
+                        train_num -= len(set_names)
+                        set_train_names.update(set_names)
+    df_train = pd.DataFrame(columns=['col1', 'col2', 'col3', 'col4'])
+    df_val = pd.DataFrame(columns=['col1', 'col2', 'col3', 'col4'])
+    for index, row in df.iterrows():
+        if row['col4'] == -1:
+            if row['col1'] in set_val_names:
+                df_val = df_val.append({'col1': row['col1'], 'col2': row['col2'], 'col3': row['col3'], 'col4': row['col4']}, ignore_index=True)
+            else:
+                df_train = df_train.append({'col1': row['col1'], 'col2': row['col2'], 'col3': row['col3'], 'col4': row['col4']}, ignore_index=True)
+        else:
+            if row['col1'] in set_val_names or row['col3'] in set_val_names:
+                df_val = df_val.append ({'col1' : row['col1'], 'col2' : row['col2'], 'col3' : row['col3'], 'col4' : row['col4']},ignore_index=True)
+            else:
+                df_train = df_train.append({'col1': row['col1'], 'col2': row['col2'], 'col3': row['col3'], 'col4': row['col4']}, ignore_index=True)
+    df_train.to_csv('df_train.csv', sep=',', encoding='utf-8')
+    df_val.to_csv('df_val.csv', sep=',', encoding='utf-8')
+    return df_train,df_val
+    #
+    # # unique_pairs_list = list(df['col1'])
+    # # pairs_names_pos_neg_df = pd.DataFrame(columns=['name', 'pos', 'neg'])
+    # # for index,row in df.iterrows():
+    # #     if (row['col4'] == -1):#positive pair
+    # #         pairs_names_pos_neg_df = pairs_names_pos_neg_df.append ({'name': row['col1'], 'pos': 1, 'neg': 0}, ignore_index=True)
+    # #     else:#negative pair
+    # #         pairs_names_pos_neg_df = pairs_names_pos_neg_df.append ({'name': row['col1'], 'pos': 0, 'neg': 1}, ignore_index=True)
+    # #         pairs_names_pos_neg_df = pairs_names_pos_neg_df.append ({'name': row['col3'], 'pos': 0, 'neg': 1}, ignore_index=True)
+    # # pairs_names_pos_neg_df = pairs_names_pos_neg_df.groupby ('name').agg (['sum'], as_index=False)
+    # # pairs_names_pos_neg_df.to_csv('pairs_pos_neg.csv', sep=',', encoding='utf-8')
+    #
+    # percentage = 0.2
+    # unique_pairs_set = set(df['col1'])
+    # for index, row in df.iterrows () :
+    #     if (row['col4'] != -1):
+    #         unique_pairs_set.add(row['col3'])
+    # unique_pairs_list = list(unique_pairs_set)
+    # random.shuffle(unique_pairs_list)
+    # unique_pairs_len = len(unique_pairs_list)
+    # unique_pairs_len_val = math.floor(percentage*unique_pairs_len)
+    # unique_pairs_list_val = unique_pairs_list[0: unique_pairs_len_val]
+    # unique_pairs_list_train = unique_pairs_list[unique_pairs_len_val : unique_pairs_len] #check startttttttttttttt unique_pairs_len_val
+    # columns=['col1', 'col2', 'col3', 'col4']
+    # list_new_for_df = []
+    # for index, row in df.iterrows():
+    #     if row['col1'] in unique_pairs_list_val:
+    #         # df_new.append([{'col1': row['col1'], 'col2': row['col2'], 'col3': row['col3'], 'col4': row['col4']}], ignore_index=True)
+    #         list_row = []
+    #         list_row.append(row['col1'])
+    #         list_row.append(row['col2'])
+    #         list_row.append(row['col3'])
+    #         list_row.append(row['col4'])
+    #         list_new_for_df.append(list_row)
+    # df_new = pd.DataFrame (list_new_for_df, columns=columns)
+    # return df_new
+
+txt_files_path = 'C:\\Users\\rtrag\\Desktop\\DataScience\\BGU\\semester1_spring_2019\\DeepLearning\\Assignments\\Assignment2'
+#txt_files_path = './Datasets/pairs'
 txt_file_name_train = 'pairsDevTrain.txt'
 txt_file_name_test = 'pairsDevTest.txt'
 
-res_train = preprocess_data(directory, txt_files_path, txt_file_name_train)
+df_train = list_names_df(txt_files_path, txt_file_name_train)
+df_test = list_names_df(txt_files_path, txt_file_name_test)
+df_train_train,df_train_val = split_train(txt_files_path, txt_file_name_train)
+
+
+res_train = preprocess_data(directory, df_train)
 print(res_train[0] + " train")
 X_train = res_train[1]
 Y_train = res_train[2]
-res_test = preprocess_data(directory, txt_files_path, txt_file_name_test)
+res_test = preprocess_data(directory, df_test)
 print(res_test[0] + " test")
 X_test = res_test[1]
 Y_test = res_test[2]
+
+res_train_train = preprocess_data(directory, df_train_train)
+print(res_train_train[0] + " train_train")
+X_train_train = res_train_train[1]
+Y_train_train = res_train_train[2]
+
+res_train_val = preprocess_data(directory, df_train_val)
+print(res_train_val[0] + " train_val")
+X_train_val = res_train_val[1]
+Y_train_val = res_train_val[2]
+
 
 
 #
@@ -174,6 +298,7 @@ Y_test = res_test[2]
 # print(res_split)
 
 #######################################################
+
 
 convolutional_net = tf.keras.models.Sequential()
 
