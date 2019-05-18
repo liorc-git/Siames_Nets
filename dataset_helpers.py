@@ -158,8 +158,9 @@ def split_train(txt_files_path, file_name):
                 df_val = df_val.append ({'col1' : row['col1'], 'col2' : row['col2'], 'col3' : row['col3'], 'col4' : row['col4']},ignore_index=True)
             else:
                 df_train = df_train.append({'col1': row['col1'], 'col2': row['col2'], 'col3': row['col3'], 'col4': row['col4']}, ignore_index=True)
-    df_train.to_csv('df_train.csv', sep=',', encoding='utf-8')
-    df_val.to_csv('df_val.csv', sep=',', encoding='utf-8')
+    #df_train.to_csv('df_train.csv', sep=',', encoding='utf-8')
+    #df_val.to_csv('df_val.csv', sep=',', encoding='utf-8')
+
     return df_train,df_val
 
    #
