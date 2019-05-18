@@ -10,7 +10,7 @@ import tensorflow as tf
 def get_image_pixels ( file_path ) :
     """
         input: jpg file path
-        output: jpg normalized pixels
+        output: jpg normalized pixels as np array
     """
 
     # load the image
@@ -53,10 +53,9 @@ for folder in os.listdir(directory):
         # print(file_pixels)
 
 
-""" X and Y are dictionaries
-    X: Each pair has key: id and dictionary with the pair
-    pair dictionary has key:name and value:pixles
-    Y: dictionary with key: id and value: 1 (match) or 0(not match)
+""" X and Y are np arrays. 
+    X[0] holds person a pixles X[1] holds person b pixles Y holds the lable. 
+    All match the index (represents pair id)
 """
 def preprocess_data(directory, txt_files_path, file_name):
     """ input: directory-jpg file directory
@@ -122,6 +121,8 @@ res_test = preprocess_data(directory, txt_files_path, txt_file_name_test)
 print(res_test[0] + " test")
 X_test = res_test[1]
 Y_test = res_test[2]
+
+
 #
 # # def train_split(X_train,Y_train)
 #
@@ -175,16 +176,34 @@ Y_test = res_test[2]
 #######################################################
 
 convolutional_net = tf.keras.models.Sequential()
-convolutional_net.add(tf.keras.layers.Conv2D(filters=16, kernel_size=(10, 10),
+
+convolutional_net.add(tf.keras.layers.Conv2D(filters=64, kernel_size=(10, 10),
                              activation='relu',
                              input_shape=X_train[0][0].shape,
                              kernel_regularizer=tf.keras.regularizers.l2(l=0.01),
                              name='Conv1'))
 convolutional_net.add(tf.keras.layers.MaxPool2D())
 
+convolutional_net.add(tf.keras.layers.Conv2D(filters=128, kernel_size=(7, 7),
+                             activation='relu',
+                             kernel_regularizer=tf.keras.regularizers.l2(l=0.01),
+                             name='Conv2'))
+convolutional_net.add(tf.keras.layers.MaxPool2D())
+
+convolutional_net.add(tf.keras.layers.Conv2D(filters=128, kernel_size=(4, 4),
+                             activation='relu',
+                             kernel_regularizer=tf.keras.regularizers.l2(l=0.01),
+                             name='Conv3'))
+convolutional_net.add(tf.keras.layers.MaxPool2D())
+
+convolutional_net.add(tf.keras.layers.Conv2D(filters=256, kernel_size=(4, 4),
+                             activation='relu',
+                             kernel_regularizer=tf.keras.regularizers.l2(l=0.01),
+                             name='Conv4'))
+
 convolutional_net.add(tf.keras.layers.Flatten())
 convolutional_net.add(
-    tf.keras.layers.Dense(units=128, activation='sigmoid',
+    tf.keras.layers.Dense(units=4096, activation='sigmoid',
           kernel_regularizer=tf.keras.regularizers.l2(l=0.01),
           name='Dense1'))
 
@@ -207,7 +226,7 @@ model = tf.keras.models.Model(
     inputs=[input_image_1, input_image_2], outputs=prediction)
 
 
-model.compile(optimizer='adam',
+model.compile(optimizer='sgd',
               loss='binary_crossentropy',
               metrics=['accuracy'])
 
