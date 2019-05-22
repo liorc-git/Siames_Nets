@@ -1,3 +1,6 @@
+################ HI ROTEM!
+
+
 import os
 import tensorflow as tf
 import dataset_helpers as ds
