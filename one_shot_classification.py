@@ -24,6 +24,9 @@ siamese_model.compile(optimizer='sgd',
 siamese_model.fit([X_train[0], X_train[1]], Y_train, epochs=5)
 
 siamese_model.evaluate([X_test[0], X_test[1]], Y_test)
+iterations_num = 500
+
+siamese_net.train_model_net(df_train_train, iterations_num)
 
 
 # # Define the optimizer and compile the model
