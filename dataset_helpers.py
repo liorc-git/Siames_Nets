@@ -4,7 +4,7 @@ import os
 from os.path import join
 import pandas as pd
 import random
-
+from tqdm import tqdm
 
 def get_image_pixels ( file_path ) :
     """
@@ -102,50 +102,51 @@ def list_names_df(txt_files_path, file_name):
     return df
 
 def find_paired(parent_index, name, set_names, df):
-    for row,index in df.iterrows():
+    for index, row in df.iterrows():
         if (index>parent_index):
             if (row['col1'] == name):
-                set_names.add(['col3'])
+                set_names.update(['col3'])
             elif (row['col3'] == name):
-                set_names.add(row['col1'])
+                set_names.update(row['col1'])
     return index, set_names
 
 def split_train(txt_files_path, file_name):
     df = list_names_df(txt_files_path, file_name)
-    val_num = round(0.3*len(df))
-    train_num = round(len(df)-val_num)
+    val_num = round(0.1*len(df))
+    train_num = len(df)-val_num
     set_val_names = set()
     set_train_names = set()
     set_names = set()
-    for index, row in df.iterrows():
+    for index, row in tqdm(df.iterrows()):
+        set_names.clear()
         rand = random.random()
         if train_num <= 0:
             continue
         elif val_num <= 0:
             continue
         else:
-            if (rand <= 0.2):
+            if (rand <= 0.1):#validation
                 if row['col1'] not in set_val_names or row['col1'] not in set_train_names:
                     set_names.add(row['col1'])
-                    if row['col4'] != -1 :
+                    if row['col4'] != -1: #diff
                         index_sub = 0
-                        while (index_sub < 2199) :
-                            index_sub, set_names = find_paired (index, row['col1'], set_names, df)
+                        while (index_sub < 2199):
+                            index_sub, set_names = find_paired(index, row['col1'], set_names, df)
                             val_num -= len(set_names)
                             set_val_names.update(set_names)
                     else :
                         val_num -= len(set_names)
                         set_val_names.update(set_names)
-            else:
+            else:#train
                 if row['col1'] not in set_val_names or row['col1'] not in set_train_names:
                     set_names.add(row['col1'])
-                    if row['col4'] != -1:
+                    if row['col4'] != -1:#diff
                         index_sub = 0
                         while (index_sub < 2199):
                             index_sub, set_names = find_paired(index, row['col1'], set_names, df)
                             train_num -= len(set_names)
                             set_train_names.update(set_names)
-                    else :
+                    else :#same
                         train_num -= len(set_names)
                         set_train_names.update(set_names)
     df_train = pd.DataFrame(columns=['col1', 'col2', 'col3', 'col4'])
@@ -161,8 +162,8 @@ def split_train(txt_files_path, file_name):
                 df_val = df_val.append ({'col1' : row['col1'], 'col2' : row['col2'], 'col3' : row['col3'], 'col4' : row['col4']},ignore_index=True)
             else:
                 df_train = df_train.append({'col1': row['col1'], 'col2': row['col2'], 'col3': row['col3'], 'col4': row['col4']}, ignore_index=True)
-    #df_train.to_csv('df_train.csv', sep=',', encoding='utf-8')
-    #df_val.to_csv('df_val.csv', sep=',', encoding='utf-8')
+    df_train.to_csv('df_train.csv', sep=',', encoding='utf-8')
+    df_val.to_csv('df_val.csv', sep=',', encoding='utf-8')
 
     return df_train,df_val
 
