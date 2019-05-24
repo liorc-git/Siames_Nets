@@ -53,7 +53,8 @@ def preprocess_data(directory, df, train_or_test):
     pairs = df.shape[0]
     X = [np.zeros((pairs, 250, 250, 1)) for i in range (2)]
     Y = np.zeros((pairs, 1))
-
+    list_same = []
+    list_diff = []
     for index, row in df.iterrows():
         if str(row['col4']) == '-1':
             pix1 = join(directory, os.fsencode(row['col1']))
@@ -71,6 +72,7 @@ def preprocess_data(directory, df, train_or_test):
             X[1][index, :, :, 0] = pix2
 
             Y[index] = 1
+            list_same.append(index)
         else:
             pix1 = join(directory, os.fsencode(row['col1']))
             pix1_num = row['col1'] + '_' + get_jpg_filename(str (row['col2'])) + '.jpg'
@@ -87,9 +89,10 @@ def preprocess_data(directory, df, train_or_test):
             X[1][index, :, :, 0] = pix2
 
             Y[index] = 0
+            list_diff.append(index)
     print("{train_or_test} data processing completed".format(train_or_test = train_or_test) )
 
-    return (X,Y)
+    return (X, Y, list_same, list_diff)
 
 def list_names_df(txt_files_path, file_name):
     path_txt = join(txt_files_path, file_name)
@@ -109,7 +112,7 @@ def find_paired(parent_index, name, set_names, df):
 
 def split_train(txt_files_path, file_name):
     df = list_names_df(txt_files_path, file_name)
-    val_num = round(0.2*len(df))
+    val_num = round(0.3*len(df))
     train_num = round(len(df)-val_num)
     set_val_names = set()
     set_train_names = set()

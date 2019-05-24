@@ -1,5 +1,8 @@
 import tensorflow as tf
 import dataset_helpers as ds
+import random
+import numpy as np
+import math
 
 
 def create_siamese_model(X_train):
@@ -56,9 +59,26 @@ def create_siamese_model(X_train):
 
     return model
 
-def train_model_net (train_data, val_data, iterations_num, support_set_size,
-                            final_momentum, momentum_slope, evaluate_each,
-                            model_name ) :
+def train_model_net (X_train, Y_train, X_val, Y_val, iterations_num, batch_num, list_same, list_diff):#, support_set_size, final_momentum, momentum_slope, evaluate_each, model_name )
+    num_train_pairs = len(X_train[0])
+    num_val_pairs = len (X_val[0])
+
+    random.shuffle(list_same)
+    random.shuffle(list_diff)
+
+    batch_loop_num = math.floor(num_train_pairs/batch_num)
+    rem_pairs = num_train_pairs%batch_num
+    batch_loop_num_half = int(batch_loop_num/2)
+    for i in range(batch_loop_num_half):
+        list_batch_indexes = []
+        list_batch_indexes.append (list_same[i:i+batch_loop_num_half])
+        list_batch_indexes.append(list_diff[i:i+batch_loop_num_half])
+        random.shuffle(list_batch_indexes)
+        #we need to define new numpy array with the new indexes from batch_indexes and to transfer it to train on batches function
+    #we need to transfer all the remaining indexes whic weren't included in the batch loop
+
+
+    print(1)
     """for each epoch: (stopping criteria 200 epochs or calidation error not decrease for 20 epochs)
     1.for each iteration:
     a. get batch
@@ -67,10 +87,9 @@ def train_model_net (train_data, val_data, iterations_num, support_set_size,
 
     c. update learning rate=n(T)=0.99*n(T-1)
     momentum is intialized to 0.5 anf increase until 1
-    d. each X epochs we calculate validation error
+    d. each X epochs we calculate validation error siamese_model.evaluate([X_test[0], X_test[1]], Y_test) --> loss , accuracy
 
-    return parameters
-
+    return df_results and the model id global
     """
 def test_model_net (test, parameters):
     """get the test and put it on model"""
