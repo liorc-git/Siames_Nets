@@ -9,35 +9,65 @@ def create_siamese_model(X_train):
 
     convolutional_net = tf.keras.models.Sequential()
 
-    convolutional_net.add(tf.keras.layers.Conv2D(filters=64, kernel_size=(10, 10),
+    convolutional_net.add(tf.keras.layers.Conv2D(filters=64,
+                                                 kernel_size=(10, 10),
+                                                 kernel_initializer =
+                                                    tf.keras.initializers.TruncatedNormal(mean = 0 ,stddev=1e-2),
+                                                 use_bias = True,
+                                                 bias_initializer =
+                                                    tf.keras.initializers.TruncatedNormal(mean = 0.5 ,stddev=1e-2),
                                                  activation='relu',
                                                  input_shape=X_train[0][0].shape,
                                                  kernel_regularizer=tf.keras.regularizers.l2(l=0.01),
-                                                 name='Conv1'))
+                                                 name='Conv_1'))
     convolutional_net.add(tf.keras.layers.MaxPool2D())
 
-    convolutional_net.add(tf.keras.layers.Conv2D(filters=128, kernel_size=(7, 7),
+    convolutional_net.add(tf.keras.layers.Conv2D(filters=128,
+                                                 kernel_size=(7, 7),
+                                                 kernel_initializer=
+                                                    tf.keras.initializers.TruncatedNormal(mean=0, stddev=1e-2),
+                                                 use_bias=True,
+                                                 bias_initializer=
+                                                    tf.keras.initializers.TruncatedNormal(mean=0.5, stddev=1e-2),
                                                  activation='relu',
                                                  kernel_regularizer=tf.keras.regularizers.l2(l=0.01),
-                                                 name='Conv2'))
+                                                 name='Conv_2'))
     convolutional_net.add(tf.keras.layers.MaxPool2D())
 
-    convolutional_net.add(tf.keras.layers.Conv2D(filters=128, kernel_size=(4, 4),
+    convolutional_net.add(tf.keras.layers.Conv2D(filters=128,
+                                                 kernel_size=(4, 4),
+                                                 kernel_initializer=
+                                                    tf.keras.initializers.TruncatedNormal(mean=0, stddev=1e-2),
+                                                 use_bias=True,
+                                                 bias_initializer=
+                                                    tf.keras.initializers.TruncatedNormal(mean=0.5, stddev=1e-2),
                                                  activation='relu',
                                                  kernel_regularizer=tf.keras.regularizers.l2(l=0.01),
-                                                 name='Conv3'))
+                                                 name='Conv_3'))
     convolutional_net.add(tf.keras.layers.MaxPool2D())
 
-    convolutional_net.add(tf.keras.layers.Conv2D(filters=256, kernel_size=(4, 4),
+    convolutional_net.add(tf.keras.layers.Conv2D(filters=256,
+                                                 kernel_size=(4, 4),
+                                                 kernel_initializer=
+                                                    tf.keras.initializers.TruncatedNormal(mean=0, stddev=1e-2),
+                                                 use_bias=True,
+                                                 bias_initializer=
+                                                    tf.keras.initializers.TruncatedNormal(mean=0.5, stddev=1e-2),
                                                  activation='relu',
                                                  kernel_regularizer=tf.keras.regularizers.l2(l=0.01),
-                                                 name='Conv4'))
+                                                 name='Conv_4'))
 
     convolutional_net.add(tf.keras.layers.Flatten())
     convolutional_net.add(
-        tf.keras.layers.Dense(units=4096, activation='sigmoid',
+        tf.keras.layers.Dense(units=4096,
+                              activation='sigmoid',
+                              kernel_initializer=
+                                tf.keras.initializers.TruncatedNormal(mean=0, stddev=1e-2),
+                              use_bias=True,
+                              bias_initializer=
+                                tf.keras.initializers.TruncatedNormal(mean=0.5, stddev=2*(1e-1)),
                               kernel_regularizer=tf.keras.regularizers.l2(l=0.01),
-                              name='Dense1'))
+                              name='Dense_1'))
 
     # Now the pairs of images
     input_image_1 = tf.keras.layers.Input(X_train[0][0].shape)
