@@ -58,14 +58,14 @@ def create_siamese_model(X_train):
                                                  name='Conv_4'))
 
     siamese_net.add(tf.keras.layers.Flatten())
-    siamese_net.add(tf.keras.layers.Dense(units=4096,
+    siamese_net.add(tf.keras.layers.Dense(units=128,
                               activation='sigmoid',
                               kernel_initializer=
                                 tf.keras.initializers.TruncatedNormal(mean=0, stddev=1e-2),
                               use_bias=True,
                               bias_initializer=
                                 tf.keras.initializers.TruncatedNormal(mean=0.5, stddev=2*(1e-1)),
-                              kernel_regularizer=tf.keras.regularizers.l2(l=0.01),  #(0, 0.1)
+                              kernel_regularizer=tf.keras.regularizers.l2(l=0.01),  #(0, 0.1)#4096 units
                               name='Dense_1'))
 
     twin_1_input = tf.keras.layers.Input(X_train[0][0].shape)

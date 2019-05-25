@@ -2,10 +2,10 @@ import os
 import dataset_helpers as ds
 import siamese_net
 
-jpg_path = '/content/DL2019_HW2_Siames_Nets/Datasets/lfwa_img_dirs'
+jpg_path = './Datasets/lfwa_img_dirs'
 directory = os.fsencode(jpg_path)
 pairs_files = ['pairsDevTrain.txt', 'pairsDevTest.txt']
-txt_files_path = '/content/DL2019_HW2_Siames_Nets/Datasets/pairs'
+txt_files_path = './Datasets/pairs'
 
 df_train_train, df_train_val = ds.split_train(txt_files_path, pairs_files[0])
 df_test = ds.list_names_df(txt_files_path, pairs_files[1])
