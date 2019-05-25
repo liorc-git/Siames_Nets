@@ -20,7 +20,7 @@ siamese_model = siamese_net.create_siamese_model(X_train)
 init_momentum = 0.5
 learning_rates = {'conv_1': 1e-4, 'conv_2': 1e-4, 'conv_3': 1e-4, 'conv_4': 1e-4, 'dense_1': 1e-4}
 
-optimizer = siamese_net.create_siamese_optimizer()
+optimizer = siamese_net.create_siamese_optimizer(init_momentum, learning_rates)
 
 siamese_model.compile(optimizer=optimizer,
                loss='binary_crossentropy',
