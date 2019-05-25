@@ -142,8 +142,9 @@ def train_model_net(X_train, Y_train, X_val, Y_val, iterations_num, batch_num, l
             list_rem_batch_indexes.append(list_same[-1 * rem_same_pairs:])
             list_rem_batch_indexes.append(list_diff[-1 * rem_diff_pairs:])
             random.shuffle(list_rem_batch_indexes)
-            X = [np.zeros((batch_num, 250, 250, 1)) for i in range(2)]
-            Y = np.zeros((batch_num, 1))
+            len_reamins = len(list_rem_batch_indexes)
+            X = [np.zeros((len_reamins, 250, 250, 1)) for i in range(2)]
+            Y = np.zeros((len_reamins, 1))
             for index_batch, value in enumerate(list_rem_batch_indexes):
                 X[0][index_batch, :, :] = X_train[0][value]
                 X[1][index_batch, :, :] = X_train[1][value]

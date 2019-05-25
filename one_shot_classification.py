@@ -7,7 +7,10 @@ directory = os.fsencode(jpg_path)
 pairs_files = ['pairsDevTrain.txt', 'pairsDevTest.txt']
 txt_files_path = './Datasets/pairs'
 
-df_train_train, df_train_val = ds.split_train(txt_files_path, pairs_files[0])
+import pandas as pd
+#df_train_train, df_train_val = ds.split_train(txt_files_path, pairs_files[0])
+df_train_train = pd.read_csv("df_train.csv")
+df_train_val = pd.read_csv("df_val.csv")
 df_test = ds.list_names_df(txt_files_path, pairs_files[1])
 
 X_train, Y_train, list_same_train, list_diff_train = ds.preprocess_data(directory, df_train_train, "Train")
@@ -33,7 +36,7 @@ siamese_model.compile(optimizer=optimizer,
 # siamese_model.evaluate([X_test[0], X_test[1]], Y_test)
 
 iterations_num = 200
-batch_num = 16
+batch_num = 128
 siamese_net.train_model_net(X_train, Y_train, X_val, Y_val, iterations_num, batch_num, list_same_train, list_diff_train, siamese_model)# insert X and YYYYYYYYYYYY
 
 #predict
