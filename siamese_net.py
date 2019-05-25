@@ -7,9 +7,9 @@ import math
 
 def create_siamese_model(X_train):
 
-    convolutional_net = tf.keras.models.Sequential()
+    siamese_net = tf.keras.models.Sequential()
 
-    convolutional_net.add(tf.keras.layers.Conv2D(filters=64,
+    siamese_net.add(tf.keras.layers.Conv2D(filters=64,
                                                  kernel_size=(10, 10),
                                                  kernel_initializer =
                                                     tf.keras.initializers.TruncatedNormal(mean = 0 ,stddev=1e-2),
@@ -18,11 +18,11 @@ def create_siamese_model(X_train):
                                                     tf.keras.initializers.TruncatedNormal(mean = 0.5 ,stddev=1e-2),
                                                  activation='relu',
                                                  input_shape=X_train[0][0].shape,
-                                                 kernel_regularizer=tf.keras.regularizers.l2(l=0.01),
+                                                 kernel_regularizer=tf.keras.regularizers.l2(l=0.01),  #(0, 0.1)
                                                  name='Conv_1'))
-    convolutional_net.add(tf.keras.layers.MaxPool2D())
+    siamese_net.add(tf.keras.layers.MaxPool2D())
 
-    convolutional_net.add(tf.keras.layers.Conv2D(filters=128,
+    siamese_net.add(tf.keras.layers.Conv2D(filters=128,
                                                  kernel_size=(7, 7),
                                                  kernel_initializer=
                                                     tf.keras.initializers.TruncatedNormal(mean=0, stddev=1e-2),
@@ -30,11 +30,11 @@ def create_siamese_model(X_train):
                                                  bias_initializer=
                                                     tf.keras.initializers.TruncatedNormal(mean=0.5, stddev=1e-2),
                                                  activation='relu',
-                                                 kernel_regularizer=tf.keras.regularizers.l2(l=0.01),
+                                                 kernel_regularizer=tf.keras.regularizers.l2(l=0.01),  #(0, 0.1)
                                                  name='Conv_2'))
-    convolutional_net.add(tf.keras.layers.MaxPool2D())
+    siamese_net.add(tf.keras.layers.MaxPool2D())
 
-    convolutional_net.add(tf.keras.layers.Conv2D(filters=128,
+    siamese_net.add(tf.keras.layers.Conv2D(filters=128,
                                                  kernel_size=(4, 4),
                                                  kernel_initializer=
                                                     tf.keras.initializers.TruncatedNormal(mean=0, stddev=1e-2),
@@ -42,11 +42,11 @@ def create_siamese_model(X_train):
                                                  bias_initializer=
                                                     tf.keras.initializers.TruncatedNormal(mean=0.5, stddev=1e-2),
                                                  activation='relu',
-                                                 kernel_regularizer=tf.keras.regularizers.l2(l=0.01),
+                                                 kernel_regularizer=tf.keras.regularizers.l2(l=0.01),  #(0, 0.1)
                                                  name='Conv_3'))
-    convolutional_net.add(tf.keras.layers.MaxPool2D())
+    siamese_net.add(tf.keras.layers.MaxPool2D())
 
-    convolutional_net.add(tf.keras.layers.Conv2D(filters=256,
+    siamese_net.add(tf.keras.layers.Conv2D(filters=256,
                                                  kernel_size=(4, 4),
                                                  kernel_initializer=
                                                     tf.keras.initializers.TruncatedNormal(mean=0, stddev=1e-2),
@@ -54,40 +54,47 @@ def create_siamese_model(X_train):
                                                  bias_initializer=
                                                     tf.keras.initializers.TruncatedNormal(mean=0.5, stddev=1e-2),
                                                  activation='relu',
-                                                 kernel_regularizer=tf.keras.regularizers.l2(l=0.01),
+                                                 kernel_regularizer=tf.keras.regularizers.l2(l=0.01),  #(0, 0.1)
                                                  name='Conv_4'))
 
-    convolutional_net.add(tf.keras.layers.Flatten())
-    convolutional_net.add(
-        tf.keras.layers.Dense(units=4096,
+    siamese_net.add(tf.keras.layers.Flatten())
+    siamese_net.add(tf.keras.layers.Dense(units=4096,
                               activation='sigmoid',
                               kernel_initializer=
                                 tf.keras.initializers.TruncatedNormal(mean=0, stddev=1e-2),
                               use_bias=True,
                               bias_initializer=
                                 tf.keras.initializers.TruncatedNormal(mean=0.5, stddev=2*(1e-1)),
-                              kernel_regularizer=tf.keras.regularizers.l2(l=0.01),
+                              kernel_regularizer=tf.keras.regularizers.l2(l=0.01),  #(0, 0.1)
                               name='Dense_1'))
 
-    # Now the pairs of images
-    input_image_1 = tf.keras.layers.Input(X_train[0][0].shape)
-    input_image_2 = tf.keras.layers.Input(X_train[0][0].shape)
+    twin_1_input = tf.keras.layers.Input(X_train[0][0].shape)
+    twin_2_input = tf.keras.layers.Input(X_train[0][0].shape)
 
-    encoded_image_1 = convolutional_net(input_image_1)
-    encoded_image_2 = convolutional_net(input_image_2)
+    flatten_twin_1 = siamese_net(twin_1_input)
+    flatten_twin_2 = siamese_net(twin_2_input)
 
     # L1 distance layer between the two encoded outputs
     # One could use Subtract from Keras, but we want the absolute value
     l1_distance_layer = tf.keras.layers.Lambda(
         lambda tensors: tf.abs(tensors[0] - tensors[1]))
-    l1_distance = l1_distance_layer([encoded_image_1, encoded_image_2])
+    l1_distance = l1_distance_layer([flatten_twin_1, flatten_twin_2])
 
     # Same class or not prediction
     prediction = tf.keras.layers.Dense(units=1, activation='sigmoid')(l1_distance)
     model = tf.keras.models.Model(
-        inputs=[input_image_1, input_image_2], outputs=prediction)
+        inputs=[twin_1_input, twin_2_input], outputs=prediction)
+
 
     return model
+
+def create_siamese_optimizer(init_momentum, learning_rates):
+    return tf.optimizers.SGD(
+        learning_rate=1e-4, # TODO layer wise learning_rates,
+        decay=0.99,
+        momentum=init_momentum, # TODO changing momentum
+        name='Momentum'
+    )
 
 def train_model_net (X_train, Y_train, X_val, Y_val, iterations_num, batch_num, list_same, list_diff):#, support_set_size, final_momentum, momentum_slope, evaluate_each, model_name )
     num_train_pairs = len(X_train[0])
