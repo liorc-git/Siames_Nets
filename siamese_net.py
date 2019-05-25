@@ -58,7 +58,7 @@ def create_siamese_model(X_train):
                                                  name='Conv_4'))
 
     siamese_net.add(tf.keras.layers.Flatten())
-    siamese_net.add(tf.keras.layers.Dense(units=128,
+    siamese_net.add(tf.keras.layers.Dense(units=4096,
                               activation='sigmoid',
                               kernel_initializer=
                                 tf.keras.initializers.TruncatedNormal(mean=0, stddev=1e-2),
@@ -159,8 +159,8 @@ def train_model_net(X_train, Y_train, X_val, Y_val, iterations_num, batch_num, l
             val_loss, val_acc = siamese_model.evaluate([X_val[0], X_val[1]], Y_val)
             df_validation_results = df_validation_results.append(
                 {'epoch': epoch, 'loss': float(val_loss), 'accuracy': float(val_acc)}, ignore_index=True)
-            if iterations_num % 20 == 0:
-                print('Validation loss, Validation Accuracy at epoch %s: %s, %s'%(epoch, float (val_loss), float (val_acc)))
+            if epoch % 20 == 0:
+                print('Validation loss, Validation Accuracy at epoch %s: %s, %s' % (epoch, float (val_loss), float (val_acc)))
             if epoch > 0:
                 acc_decrease_per = (val_acc_prev - val_acc)/val_acc_prev
                 if acc_decrease_per > 0.01:
@@ -170,9 +170,8 @@ def train_model_net(X_train, Y_train, X_val, Y_val, iterations_num, batch_num, l
                 if decrease_acc_num >= 20:
                     break
             val_acc_prev = val_acc
-            return df_validation_results
+        return df_validation_results
 
-        print(1)
         """for each epoch: (stopping criteria 200 epochs or calidation error not decrease for 20 epochs)
         1.for each iteration:
         a. get batch
