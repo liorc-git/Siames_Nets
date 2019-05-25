@@ -147,12 +147,12 @@ def train_model_net (X_train, Y_train, X_val, Y_val, iterations_num, batch_num, 
         if iterations_num % 20 == 0:
             print('Validation loss, Validation Accuracy at epoch %s: %s, %s' % (iter, float (val_loss), float(val_acc)))
         if iter > 0:
-            val_acc_prev > val_acc
-            decrease_acc_num += 1
-            if decrease_acc_num == 20:
+            acc_decrease_per = (val_acc_prev-val_acc)/val_acc_prev
+            if acc_decrease_per > 0.01:
+                decrease_acc_num += 1
                 break
-        else:
-            decrease_acc_num = 0
+            else:
+                decrease_acc_num = 0
         val_acc_prev = val_acc
     return df_validation_results
 

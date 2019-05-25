@@ -28,7 +28,7 @@ siamese_model.compile(optimizer='sgd',
 # siamese_model.fit([X_train[0], X_train[1]], Y_train, epochs=5)
 #
 # siamese_model.evaluate([X_test[0], X_test[1]], Y_test)
-iterations_num = 500
+iterations_num = 200
 batch_num = 16
 siamese_net.train_model_net(X_train, Y_train, X_val, Y_val, iterations_num, batch_num, list_same_train, list_diff_train, siamese_model)# insert X and YYYYYYYYYYYY
 #predict
