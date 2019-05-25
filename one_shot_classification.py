@@ -26,7 +26,7 @@ siamese_model.compile(optimizer=optimizer,
                loss='binary_crossentropy',
                metrics=['accuracy'])
 
-siamese_model.fit([X_train[0], X_train[1]], Y_train, epochs=5)
+# siamese_model.fit([X_train[0], X_train[1]], Y_train, epochs=5)
 
 
 # siamese_model.fit([X_train[0], X_train[1]], Y_train, epochs=5)

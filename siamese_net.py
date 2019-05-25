@@ -131,7 +131,10 @@ def train_model_net(X_train, Y_train, X_val, Y_val, iterations_num, batch_num, l
                     Y[index_batch] = Y_train[value]
                 image_batch = X
                 label_batch = Y
-                train_loss, train_acc = siamese_model.train_on_batch(image_batch, label_batch)  # not in useeeeeeeeee
+                # siamese_model.fit(image_batch, label_batch, verbose=2)
+                train_loss, train_acc = siamese_model.train_on_batch(image_batch, label_batch)# not in useeeeeeeeee
+                print('Train loss, Train Accuracy at epoch %s, batch %s: %s, %s' % (epoch, index, float(train_loss), float(train_acc)))
+
             rem_same_pairs = len_list_same - (batch_loop_num * batch_loop_num_half)
             rem_diff_pairs = len_list_diff - (batch_loop_num * batch_loop_num_half)
             # need to check if we want to make train on the remain
@@ -148,13 +151,13 @@ def train_model_net(X_train, Y_train, X_val, Y_val, iterations_num, batch_num, l
             image_batch = X
             label_batch = Y
             train_loss, train_acc = siamese_model.train_on_batch(image_batch, label_batch)  # not in useeeeeeeeee
-
+            print('Train loss, Train Accuracy at epoch %s, final_batch: %s, %s' % (epoch, float(train_loss), float(train_acc)))
             # evaluate for validation and check if there are 20 consecutive decrease in validation accuracy
             val_loss, val_acc = siamese_model.evaluate([X_val[0], X_val[1]], Y_val)
             df_validation_results = df_validation_results.append(
-                {'epoch': iter, 'loss': float(val_loss), 'accuracy': float(val_acc)}, ignore_index=True)
+                {'epoch': epoch, 'loss': float(val_loss), 'accuracy': float(val_acc)}, ignore_index=True)
             if iterations_num % 20 == 0:
-                print('Validation loss, Validation Accuracy at epoch %s: %s, %s'%(iter, float (val_loss), float (val_acc)))
+                print('Validation loss, Validation Accuracy at epoch %s: %s, %s'%(epoch, float (val_loss), float (val_acc)))
             if epoch > 0:
                 acc_decrease_per = (val_acc_prev - val_acc)/val_acc_prev
                 if acc_decrease_per > 0.01:
