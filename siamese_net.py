@@ -135,12 +135,14 @@ def train_model_net(X_train, Y_train, X_val, Y_val, iterations_num, batch_num, l
                 train_loss, train_acc = siamese_model.train_on_batch(image_batch, label_batch)# not in useeeeeeeeee
                 print('Train loss, Train Accuracy at epoch %s, batch %s: %s, %s' % (epoch, index, float(train_loss), float(train_acc)))
 
-            rem_same_pairs = len_list_same - (batch_loop_num * batch_loop_num_half)
-            rem_diff_pairs = len_list_diff - (batch_loop_num * batch_loop_num_half)
+
+            # remains(for all pairs which aren't in batch loop)
+            rem_same_pairs = len_list_same - (batch_loop_num*batch_loop_num_half)
+            rem_diff_pairs = len_list_diff - (batch_loop_num*batch_loop_num_half)
             # need to check if we want to make train on the remain
             list_rem_batch_indexes = []
-            list_rem_batch_indexes.append(list_same[-1 * rem_same_pairs:])
-            list_rem_batch_indexes.append(list_diff[-1 * rem_diff_pairs:])
+            list_rem_batch_indexes.extend(list_same[-1 * rem_same_pairs:])
+            list_rem_batch_indexes.extend(list_diff[-1 * rem_diff_pairs:])
             random.shuffle(list_rem_batch_indexes)
             len_reamins = len(list_rem_batch_indexes)
             X = [np.zeros((len_reamins, 250, 250, 1)) for i in range(2)]
