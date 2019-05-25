@@ -104,8 +104,7 @@ def train_model_net(X_train, Y_train, X_val, Y_val, iterations_num, batch_num, l
          """
         num_train_pairs = len(X_train[0])
         num_val_pairs = len(X_val[0])
-        random.shuffle(list_same)
-        random.shuffle(list_diff)
+
         len_list_same = len(list_same)
         len_list_diff = len(list_diff)
         batch_loop_num_half = int(batch_num / 2)
@@ -118,6 +117,8 @@ def train_model_net(X_train, Y_train, X_val, Y_val, iterations_num, batch_num, l
         val_acc_prev = 0
         decrease_acc_num = 0  # for consecutive decrease in accuracy
         for epoch in range(iterations_num):
+            random.shuffle (list_same)
+            random.shuffle (list_diff)
             for index in range(batch_loop_num):
                 list_batch_indexes = []
                 list_batch_indexes.extend(list_same[index * batch_loop_num_half:(index + 1) * batch_loop_num_half])
@@ -131,7 +132,7 @@ def train_model_net(X_train, Y_train, X_val, Y_val, iterations_num, batch_num, l
                     Y[index_batch] = Y_train[value]
                 image_batch = X
                 label_batch = Y
-                # siamese_model.fit(image_batch, label_batch, verbose=2)
+                siamese_model.fit(image_batch, label_batch, verbose=2)
                 train_loss, train_acc = siamese_model.train_on_batch(image_batch, label_batch)# not in useeeeeeeeee
                 print('Train loss, Train Accuracy at epoch %s, batch %s: %s, %s' % (epoch, index, float(train_loss), float(train_acc)))
 
