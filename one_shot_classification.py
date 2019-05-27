@@ -1,14 +1,15 @@
 import os
 import dataset_helpers as ds
 import siamese_net
+import pandas as pd
+
 
 jpg_path = './Datasets/lfwa_img_dirs'
 directory = os.fsencode(jpg_path)
 pairs_files = ['pairsDevTrain.txt', 'pairsDevTest.txt']
 txt_files_path = './Datasets/pairs'
 
-import pandas as pd
-#df_train_train, df_train_val = ds.split_train(txt_files_path, pairs_files[0])
+df_train_train, df_train_val = ds.split_train(txt_files_path, pairs_files[0])
 df_train_train = pd.read_csv("df_train.csv")
 df_train_val = pd.read_csv("df_val.csv")
 df_test = ds.list_names_df(txt_files_path, pairs_files[1])
