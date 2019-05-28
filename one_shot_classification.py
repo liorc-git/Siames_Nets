@@ -1,5 +1,6 @@
 import dataset_helpers as ds
 import siamese_net
+import tensorflow as tf
 
 
 jpg_path = './Datasets/lfwa_img_dirs/'
@@ -16,10 +17,20 @@ X_test, y_test = ds.preprocess_data(jpg_path, df_test, "Test")
 
 siamese_model = siamese_net.create_siamese_model(X_train)
 
-init_momentum = 0.5
-learning_rates = {'conv_1': 1e-4, 'conv_2': 1e-4, 'conv_3': 1e-4, 'conv_4': 1e-4, 'dense_1': 1e-4}
+# optimizer = tf.optimizers.SGD(  #tf.keras.optimizers.Adam
+#         learning_rate=1e-4, # TODO layer wise learning_rates,
+#         decay=0.99,
+#         momentum=0.5, # TODO changing momentum
+#         name='Momentum'
+#     )
 
-optimizer = siamese_net.create_siamese_optimizer(init_momentum, learning_rates)
+
+optimizer = tf.optimizers.Nadam( learning_rate=0.001,
+    beta_1=0.9,
+    beta_2=0.99,
+    epsilon=1e-07,
+    name='Nadam'
+)
 
 siamese_model.compile(optimizer=optimizer,
                loss='binary_crossentropy',

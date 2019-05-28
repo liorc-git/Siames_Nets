@@ -9,7 +9,7 @@ def create_siamese_model(X_train):
 
     siamese_net = tf.keras.models.Sequential()
 
-    siamese_net.add(tf.keras.layers.Conv2D(filters=64,
+    siamese_net.add(tf.keras.layers.Conv2D(filters=32, #64
                                                  kernel_size=(10, 10),
                                                  kernel_initializer =
                                                     tf.keras.initializers.TruncatedNormal(mean = 0 ,stddev=1e-2),
@@ -22,7 +22,7 @@ def create_siamese_model(X_train):
                                                  name='Conv_1'))
     siamese_net.add(tf.keras.layers.MaxPool2D())
 
-    siamese_net.add(tf.keras.layers.Conv2D(filters=128,
+    siamese_net.add(tf.keras.layers.Conv2D(filters=64, #128
                                                  kernel_size=(7, 7),
                                                  kernel_initializer=
                                                     tf.keras.initializers.TruncatedNormal(mean=0, stddev=1e-2),
@@ -34,7 +34,7 @@ def create_siamese_model(X_train):
                                                  name='Conv_2'))
     siamese_net.add(tf.keras.layers.MaxPool2D())
 
-    siamese_net.add(tf.keras.layers.Conv2D(filters=128,
+    siamese_net.add(tf.keras.layers.Conv2D(filters=64, #128
                                                  kernel_size=(4, 4),
                                                  kernel_initializer=
                                                     tf.keras.initializers.TruncatedNormal(mean=0, stddev=1e-2),
@@ -46,7 +46,7 @@ def create_siamese_model(X_train):
                                                  name='Conv_3'))
     siamese_net.add(tf.keras.layers.MaxPool2D())
 
-    siamese_net.add(tf.keras.layers.Conv2D(filters=256,
+    siamese_net.add(tf.keras.layers.Conv2D(filters=128, #256
                                                  kernel_size=(4, 4),
                                                  kernel_initializer=
                                                     tf.keras.initializers.TruncatedNormal(mean=0, stddev=1e-2),
@@ -58,7 +58,7 @@ def create_siamese_model(X_train):
                                                  name='Conv_4'))
 
     siamese_net.add(tf.keras.layers.Flatten())
-    siamese_net.add(tf.keras.layers.Dense(units=500, #4096 units
+    siamese_net.add(tf.keras.layers.Dense(units=512, #4096
                               activation='sigmoid',
                               kernel_initializer=
                                 tf.keras.initializers.TruncatedNormal(mean=0, stddev=1e-2),
@@ -84,14 +84,6 @@ def create_siamese_model(X_train):
 
     return model
 
-
-def create_siamese_optimizer(init_momentum, learning_rates):
-    return tf.keras.optimizers.Adam(  #tf.optimizers.SGD
-        learning_rate=1e-4, # TODO layer wise learning_rates,
-        decay=0.99,
-        momentum=init_momentum, # TODO changing momentum
-        name='Momentum'
-    )
 
 def train_model_net(X_train, Y_train, X_val, Y_val, iterations_num, batch_num, list_same, list_diff,
                         siamese_model):  # , support_set_size, final_momentum, momentum_slope, evaluate_each, model_name )
@@ -128,8 +120,7 @@ def train_model_net(X_train, Y_train, X_val, Y_val, iterations_num, batch_num, l
                     Y[index_batch] = Y_train[value]
                 image_batch = X
                 label_batch = Y
-                siamese_model.fit(image_batch, label_batch, verbose=2)
-                train_loss, train_acc = siamese_model.train_on_batch(image_batch, label_batch)# not in useeeeeeeeee
+                train_loss, train_acc = siamese_model.train_on_batch(image_batch, label_batch, verbose=1)# not in useeeeeeeeee
                 print('Train loss, Train Accuracy at epoch %s, batch %s: %s, %s' % (epoch, index, float(train_loss), float(train_acc)))
 
 
@@ -150,7 +141,7 @@ def train_model_net(X_train, Y_train, X_val, Y_val, iterations_num, batch_num, l
                 Y[index_batch] = Y_train[value]
             image_batch = X
             label_batch = Y
-            train_loss, train_acc = siamese_model.train_on_batch(image_batch, label_batch)  # not in useeeeeeeeee
+            train_loss, train_acc = siamese_model.train_on_batch(image_batch, label_batch, verbose=1)  # not in useeeeeeeeee
             print('Train loss, Train Accuracy at epoch %s, final_batch: %s, %s' % (epoch, float(train_loss), float(train_acc)))
             # evaluate for validation and check if there are 20 consecutive decrease in validation accuracy
             val_loss, val_acc = siamese_model.evaluate([X_val[0], X_val[1]], Y_val)
