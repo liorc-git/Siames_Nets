@@ -18,7 +18,7 @@ def create_siamese_model(X_train):
                                                     tf.keras.initializers.TruncatedNormal(mean = 0.5 ,stddev=1e-2),
                                                  activation='relu',
                                                  input_shape=X_train[0][0].shape,
-                                                 kernel_regularizer=tf.keras.regularizers.l2(l=0.01),  #(0, 0.1)
+                                                 kernel_regularizer=tf.keras.regularizers.l2(l=0.01),
                                                  name='Conv_1'))
     siamese_net.add(tf.keras.layers.MaxPool2D())
 
@@ -30,7 +30,7 @@ def create_siamese_model(X_train):
                                                  bias_initializer=
                                                     tf.keras.initializers.TruncatedNormal(mean=0.5, stddev=1e-2),
                                                  activation='relu',
-                                                 kernel_regularizer=tf.keras.regularizers.l2(l=0.01),  #(0, 0.1)
+                                                 kernel_regularizer=tf.keras.regularizers.l2(l=0.01),
                                                  name='Conv_2'))
     siamese_net.add(tf.keras.layers.MaxPool2D())
 
@@ -42,7 +42,7 @@ def create_siamese_model(X_train):
                                                  bias_initializer=
                                                     tf.keras.initializers.TruncatedNormal(mean=0.5, stddev=1e-2),
                                                  activation='relu',
-                                                 kernel_regularizer=tf.keras.regularizers.l2(l=0.01),  #(0, 0.1)
+                                                 kernel_regularizer=tf.keras.regularizers.l2(l=0.01),
                                                  name='Conv_3'))
     siamese_net.add(tf.keras.layers.MaxPool2D())
 
@@ -54,18 +54,18 @@ def create_siamese_model(X_train):
                                                  bias_initializer=
                                                     tf.keras.initializers.TruncatedNormal(mean=0.5, stddev=1e-2),
                                                  activation='relu',
-                                                 kernel_regularizer=tf.keras.regularizers.l2(l=0.01),  #(0, 0.1)
+                                                 kernel_regularizer=tf.keras.regularizers.l2(l=0.01),
                                                  name='Conv_4'))
 
     siamese_net.add(tf.keras.layers.Flatten())
-    siamese_net.add(tf.keras.layers.Dense(units=4096,
+    siamese_net.add(tf.keras.layers.Dense(units=500, #4096 units
                               activation='sigmoid',
                               kernel_initializer=
                                 tf.keras.initializers.TruncatedNormal(mean=0, stddev=1e-2),
                               use_bias=True,
                               bias_initializer=
                                 tf.keras.initializers.TruncatedNormal(mean=0.5, stddev=2*(1e-1)),
-                              kernel_regularizer=tf.keras.regularizers.l2(l=0.01),  #(0, 0.1)#4096 units
+                              kernel_regularizer=tf.keras.regularizers.l2(l=0.01),
                               name='Dense_1'))
 
     twin_1_input = tf.keras.layers.Input(X_train[0][0].shape)
@@ -74,23 +74,19 @@ def create_siamese_model(X_train):
     flatten_twin_1 = siamese_net(twin_1_input)
     flatten_twin_2 = siamese_net(twin_2_input)
 
-    # L1 distance layer between the two encoded outputs
-    # One could use Subtract from Keras, but we want the absolute value
-    l1_distance_layer = tf.keras.layers.Lambda(
-        lambda tensors: tf.abs(tensors[0] - tensors[1]))
-    l1_distance = l1_distance_layer([flatten_twin_1, flatten_twin_2])
+    # Calc L1 distance between twins
+    dist_layer = tf.keras.layers.Lambda(lambda tensors: tf.abs(tensors[0] - tensors[1]))
+    l1_dist = dist_layer([flatten_twin_1, flatten_twin_2])
 
-    # Same class or not prediction
-    prediction = tf.keras.layers.Dense(units=1, activation='sigmoid')(l1_distance)
-    model = tf.keras.models.Model(
-        inputs=[twin_1_input, twin_2_input], outputs=prediction)
+    prediction = tf.keras.layers.Dense(units=1, activation='sigmoid')(l1_dist)
+    model = tf.keras.models.Model(inputs=[twin_1_input, twin_2_input], outputs=prediction)
 
 
     return model
 
 
 def create_siamese_optimizer(init_momentum, learning_rates):
-    return tf.optimizers.SGD(
+    return tf.keras.optimizers.Adam(  #tf.optimizers.SGD
         learning_rate=1e-4, # TODO layer wise learning_rates,
         decay=0.99,
         momentum=init_momentum, # TODO changing momentum
