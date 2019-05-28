@@ -120,7 +120,7 @@ def train_model_net(X_train, Y_train, X_val, Y_val, iterations_num, batch_num, l
                     Y[index_batch] = Y_train[value]
                 image_batch = X
                 label_batch = Y
-                train_loss, train_acc = siamese_model.train_on_batch(image_batch, label_batch, verbose=1)# not in useeeeeeeeee
+                train_loss, train_acc = siamese_model.train_on_batch(image_batch, label_batch)# not in useeeeeeeeee
                 print('Train loss, Train Accuracy at epoch %s, batch %s: %s, %s' % (epoch, index, float(train_loss), float(train_acc)))
 
 
@@ -141,7 +141,7 @@ def train_model_net(X_train, Y_train, X_val, Y_val, iterations_num, batch_num, l
                 Y[index_batch] = Y_train[value]
             image_batch = X
             label_batch = Y
-            train_loss, train_acc = siamese_model.train_on_batch(image_batch, label_batch, verbose=1)  # not in useeeeeeeeee
+            train_loss, train_acc = siamese_model.train_on_batch(image_batch, label_batch)  # not in useeeeeeeeee
             print('Train loss, Train Accuracy at epoch %s, final_batch: %s, %s' % (epoch, float(train_loss), float(train_acc)))
             # evaluate for validation and check if there are 20 consecutive decrease in validation accuracy
             val_loss, val_acc = siamese_model.evaluate([X_val[0], X_val[1]], Y_val)
