@@ -34,9 +34,6 @@ def split_train(df_data):
         train_val_ratio = len(df_val['is_same_person'])/len(df_train['is_same_person'])
         class_balance = len(df_train[df_train['is_same_person']==1])/len(df_train['is_same_person'])
 
-        list_same_train = np.unique(np.hstack((df_train[df_train['is_same_person']==1]['twin_1'].values , df_train['twin_2'][df_train['is_same_person']==1].values) ))
-        list_diff_train = np.unique(np.hstack((df_train[df_train['is_same_person']==0]['twin_1'].values , df_train['twin_2'][df_train['is_same_person']==0].values) ))
-
     return df_train, df_val
 
 
