@@ -9,7 +9,7 @@ def create_siamese_model(X_train):
 
     siamese_net = tf.keras.models.Sequential()
 
-    siamese_net.add(tf.keras.layers.Conv2D(filters=32, #64
+    siamese_net.add(tf.keras.layers.Conv2D(filters=64, #64
                                                  kernel_size=(10, 10),
                                                  kernel_initializer =
                                                     tf.keras.initializers.TruncatedNormal(mean = 0 ,stddev=1e-2),
@@ -20,6 +20,7 @@ def create_siamese_model(X_train):
                                                  input_shape=X_train[0][0].shape,
                                                  kernel_regularizer=tf.keras.regularizers.l2(l=0.01),
                                                  name='Conv_1'))
+    siamese_net.add(tf.keras.layers.Dropout(0.5))
     siamese_net.add(tf.keras.layers.MaxPool2D())
 
     siamese_net.add(tf.keras.layers.Conv2D(filters=64, #128
@@ -32,6 +33,7 @@ def create_siamese_model(X_train):
                                                  activation='relu',
                                                  kernel_regularizer=tf.keras.regularizers.l2(l=0.01),
                                                  name='Conv_2'))
+    siamese_net.add(tf.keras.layers.Dropout(0.5))
     siamese_net.add(tf.keras.layers.MaxPool2D())
 
     siamese_net.add(tf.keras.layers.Conv2D(filters=64, #128
@@ -44,6 +46,7 @@ def create_siamese_model(X_train):
                                                  activation='relu',
                                                  kernel_regularizer=tf.keras.regularizers.l2(l=0.01),
                                                  name='Conv_3'))
+    siamese_net.add(tf.keras.layers.Dropout(0.5))
     siamese_net.add(tf.keras.layers.MaxPool2D())
 
     siamese_net.add(tf.keras.layers.Conv2D(filters=128, #256
@@ -59,7 +62,7 @@ def create_siamese_model(X_train):
 
     siamese_net.add(tf.keras.layers.Flatten())
     siamese_net.add(tf.keras.layers.Dense(units=512, #4096
-                              activation='sigmoid',
+                              activation='softmax',
                               kernel_initializer=
                                 tf.keras.initializers.TruncatedNormal(mean=0, stddev=1e-2),
                               use_bias=True,

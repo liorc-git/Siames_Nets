@@ -25,11 +25,11 @@ siamese_model = siamese_net.create_siamese_model(X_train)
 #     )
 
 
-optimizer = tf.optimizers.Nadam( learning_rate=0.001,
+optimizer = tf.optimizers.Adam( learning_rate=0.001,
     beta_1=0.9,
     beta_2=0.99,
     epsilon=1e-07,
-    name='Nadam'
+    name='Adam'
 )
 
 siamese_model.compile(optimizer=optimizer,
