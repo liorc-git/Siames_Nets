@@ -96,11 +96,13 @@ def train_model_net(X_train, y_train, X_val, y_val, iterations_num, batch_size, 
 
         for epoch in range(iterations_num):
             batch_num = 1
-            while pos.any() or neg.any():
-                pos_batch = random.choices(pos, k=min(batch_size_per_class, len(pos)))
-                pos = np.array([x for x in pos if x not in pos_batch])
-                neg_batch = random.choices(neg, k=min(batch_size_per_class, len(neg)))
-                neg = np.array([x for x in neg if x not in neg_batch])
+            pos_new = pos
+            neg_new = neg
+            while pos_new.any() or neg_new.any():
+                pos_batch = random.choices(pos_new, k=min(batch_size_per_class, len(pos_new)))
+                pos_new = np.array([x for x in pos_new if x not in pos_batch])
+                neg_batch = random.choices(neg_new, k=min(batch_size_per_class, len(neg_new)))
+                neg_new = np.array([x for x in neg_new if x not in neg_batch])
                 batch_idx = pos_batch + neg_batch
                 X = [X_train[0][batch_idx], X_train[1][batch_idx]]
                 y = y_train[batch_idx]
@@ -108,19 +110,19 @@ def train_model_net(X_train, y_train, X_val, y_val, iterations_num, batch_size, 
                 train_loss, train_acc = siamese_model.train_on_batch(X, y)
                 df_train_res = df_train_res.append(
                     {'epoch': epoch, 'loss': float(train_loss), 'accuracy': float(train_acc)}, ignore_index=True)
-                print('Train loss, Train Accuracy at epoch %s, batch %s: %s, %s' % (epoch, batch_num,
+                print('epoch %s, batch %s - train loss, acc: %s, %s' % (epoch, batch_num,
                                                                      float(train_loss), float(train_acc)))
                 batch_num += 1
 
             val_loss, val_acc = siamese_model.evaluate([X_val[0], X_val[1]], y_val)
             df_val_res = df_val_res.append(
                 {'epoch': epoch, 'loss': float(val_loss), 'accuracy': float(val_acc)}, ignore_index=True)
-            print('Validation loss, Validation Accuracy at epoch %s: %s, %s' % (epoch, float (val_loss), float (val_acc)))
+            print('epoch %s - validation loss, acc: %s, %s' % (epoch, float (val_loss), float (val_acc)))
 
-            if epoch % 20 == 0 and epoch != 0:
+            if epoch % 2 == 0 and epoch != 0:
 
                 if (df_val_res[df_val_res[epoch] == epoch]['accuracy']/
-                    df_val_res[df_val_res[epoch] == epoch-20]['accuracy'])<1.01:
+                    df_val_res[df_val_res[epoch] == epoch-2]['accuracy'])<1.01:
                         break
 
         return df_val_res
