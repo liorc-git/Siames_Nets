@@ -26,12 +26,12 @@ def split_train(df_data):
     names = np.unique(np.hstack((df_data['twin_1'].values , df_data['twin_2'].values) ))
     class_balance = 0
     train_val_ratio = 0
-    while not ((class_balance>0.48 and class_balance < 0.52) and (train_val_ratio>0.18 and train_val_ratio < 0.22)):
-        names_for_val = random.choices(names, k=218)  # for more elegant solution: k = random.randint(int(len(names)/10+3), int(len(names)/10+5))
+    while not ((class_balance>0.48 and class_balance < 0.52) and (train_val_ratio>0.08 and train_val_ratio < 0.12)):
+        names_for_val = random.choices(names, k=153)  # for more elegant solution: k = random.randint(int(len(names)/10+3), int(len(names)/10+5))
         df_val = df_data[(df_data['twin_1'].isin(names_for_val)) | (df_data['twin_2'].isin(names_for_val))]
         names_df_val = np.unique(np.hstack((df_val['twin_1'].values, df_val['twin_2'].values)))
         df_train = df_data[~((df_data['twin_1'].isin(names_df_val)) | (df_data['twin_2'].isin(names_df_val)))]
-        train_val_ratio = len(df_val['is_same_person'])/len(df_train['is_same_person'])
+        train_val_ratio = len(df_val['is_same_person'])/len(df_data['is_same_person'])
         class_balance = len(df_train[df_train['is_same_person']==1])/len(df_train['is_same_person'])
 
     return df_train, df_val
