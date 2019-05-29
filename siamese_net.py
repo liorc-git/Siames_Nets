@@ -121,8 +121,8 @@ def train_model_net(X_train, y_train, X_val, y_val, iterations_num, batch_size, 
 
             if epoch % 2 == 0 and epoch != 0:
 
-                if (df_val_res[df_val_res[epoch] == epoch]['accuracy']/
-                    df_val_res[df_val_res[epoch] == epoch-2]['accuracy'])<1.01:
+                if (df_val_res[df_val_res['epoch'] == epoch]['accuracy']/ \
+                    df_val_res[df_val_res['epoch'] == epoch-2]['accuracy'])<1.01:
                         break
 
         return df_val_res
