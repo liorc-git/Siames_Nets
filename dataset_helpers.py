@@ -49,7 +49,7 @@ def get_image_pixels ( file_path ) :
     pixels = np.asarray (face_image)
     # normalize pixels to the range 0-1
     pixels = pixels.astype ('float32')
-    pixels /= 255.0
+    #pixels /= 255.0
 
     return pixels
 

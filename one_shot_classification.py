@@ -25,7 +25,7 @@ siamese_model = siamese_net.create_siamese_model(X_train)
 #     )
 
 
-optimizer = tf.optimizers.Adam( learning_rate=0.001,
+optimizer = tf.optimizers.Adam( learning_rate=0.00001,
     beta_1=0.9,
     beta_2=0.99,
     epsilon=1e-07,
@@ -36,9 +36,9 @@ siamese_model.compile(optimizer=optimizer,
                loss='binary_crossentropy',
                metrics=['accuracy'])
 
-iterations_num = 200
-batch_num = 128
-siamese_net.train_model_net(X_train, y_train, X_val, y_val, iterations_num, batch_num, list_same_train, list_diff_train, siamese_model)# insert X and YYYYYYYYYYYY
+iterations_num = 30
+batch_num = 32
+siamese_net.train_model_net(X_train, y_train, X_val, y_val, iterations_num, batch_num, siamese_model)
 
 #predict
 siamese_model.evaluate([X_test[0], X_test[1]], y_test)

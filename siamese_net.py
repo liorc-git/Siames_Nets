@@ -9,7 +9,7 @@ def create_siamese_model(X_train):
 
     siamese_net = tf.keras.models.Sequential()
 
-    siamese_net.add(tf.keras.layers.Conv2D(filters=64, #64
+    siamese_net.add(tf.keras.layers.Conv2D(filters=32, #64
                                                  kernel_size=(10, 10),
                                                  kernel_initializer =
                                                     tf.keras.initializers.TruncatedNormal(mean = 0 ,stddev=1e-2),
@@ -20,48 +20,51 @@ def create_siamese_model(X_train):
                                                  input_shape=X_train[0][0].shape,
                                                  kernel_regularizer=tf.keras.regularizers.l2(l=0.01),
                                                  name='Conv_1'))
+    #siamese_net.add(tf.keras.layers.BatchNormalization())
     siamese_net.add(tf.keras.layers.Dropout(0.5))
-    siamese_net.add(tf.keras.layers.MaxPool2D())
-
-    siamese_net.add(tf.keras.layers.Conv2D(filters=64, #128
-                                                 kernel_size=(7, 7),
-                                                 kernel_initializer=
-                                                    tf.keras.initializers.TruncatedNormal(mean=0, stddev=1e-2),
-                                                 use_bias=True,
-                                                 bias_initializer=
-                                                    tf.keras.initializers.TruncatedNormal(mean=0.5, stddev=1e-2),
-                                                 activation='relu',
-                                                 kernel_regularizer=tf.keras.regularizers.l2(l=0.01),
-                                                 name='Conv_2'))
-    siamese_net.add(tf.keras.layers.Dropout(0.5))
-    siamese_net.add(tf.keras.layers.MaxPool2D())
-
-    siamese_net.add(tf.keras.layers.Conv2D(filters=64, #128
-                                                 kernel_size=(4, 4),
-                                                 kernel_initializer=
-                                                    tf.keras.initializers.TruncatedNormal(mean=0, stddev=1e-2),
-                                                 use_bias=True,
-                                                 bias_initializer=
-                                                    tf.keras.initializers.TruncatedNormal(mean=0.5, stddev=1e-2),
-                                                 activation='relu',
-                                                 kernel_regularizer=tf.keras.regularizers.l2(l=0.01),
-                                                 name='Conv_3'))
-    siamese_net.add(tf.keras.layers.Dropout(0.5))
-    siamese_net.add(tf.keras.layers.MaxPool2D())
-
-    siamese_net.add(tf.keras.layers.Conv2D(filters=128, #256
-                                                 kernel_size=(4, 4),
-                                                 kernel_initializer=
-                                                    tf.keras.initializers.TruncatedNormal(mean=0, stddev=1e-2),
-                                                 use_bias=True,
-                                                 bias_initializer=
-                                                    tf.keras.initializers.TruncatedNormal(mean=0.5, stddev=1e-2),
-                                                 activation='relu',
-                                                 kernel_regularizer=tf.keras.regularizers.l2(l=0.01),
-                                                 name='Conv_4'))
+    #siamese_net.add(tf.keras.layers.MaxPool2D())
+    #
+    # siamese_net.add(tf.keras.layers.Conv2D(filters=64, #128
+    #                                              kernel_size=(7, 7),
+    #                                              # kernel_initializer=
+    #                                              #    tf.keras.initializers.TruncatedNormal(mean=0, stddev=1e-2),
+    #                                              # use_bias=True,
+    #                                              # bias_initializer=
+    #                                              #    tf.keras.initializers.TruncatedNormal(mean=0.5, stddev=1e-2),
+    #                                              activation='relu',
+    #                                              kernel_regularizer=tf.keras.regularizers.l2(l=0.01),
+    #                                              name='Conv_2'))
+    # siamese_net.add(tf.keras.layers.BatchNormalization())
+    # #siamese_net.add(tf.keras.layers.Dropout(0.5))
+    # siamese_net.add(tf.keras.layers.MaxPool2D())
+    #
+    # siamese_net.add(tf.keras.layers.Conv2D(filters=64, #128
+    #                                              kernel_size=(4, 4),
+    #                                              # kernel_initializer=
+    #                                              #    tf.keras.initializers.TruncatedNormal(mean=0, stddev=1e-2),
+    #                                              # use_bias=True,
+    #                                              # bias_initializer=
+    #                                              #    tf.keras.initializers.TruncatedNormal(mean=0.5, stddev=1e-2),
+    #                                              activation='relu',
+    #                                              kernel_regularizer=tf.keras.regularizers.l2(l=0.01),
+    #                                              name='Conv_3'))
+    # siamese_net.add(tf.keras.layers.BatchNormalization())
+    # #siamese_net.add(tf.keras.layers.Dropout(0.5))
+    # siamese_net.add(tf.keras.layers.MaxPool2D())
+    #
+    # siamese_net.add(tf.keras.layers.Conv2D(filters=128, #256
+    #                                              kernel_size=(4, 4),
+    #                                              # kernel_initializer=
+    #                                              #    tf.keras.initializers.TruncatedNormal(mean=0, stddev=1e-2),
+    #                                              # use_bias=True,
+    #                                              # bias_initializer=
+    #                                              #    tf.keras.initializers.TruncatedNormal(mean=0.5, stddev=1e-2),
+    #                                              activation='relu',
+    #                                              kernel_regularizer=tf.keras.regularizers.l2(l=0.01),
+    #                                              name='Conv_4'))
 
     siamese_net.add(tf.keras.layers.Flatten())
-    siamese_net.add(tf.keras.layers.Dense(units=512, #4096
+    siamese_net.add(tf.keras.layers.Dense(units=256, #4096
                               activation='softmax',
                               kernel_initializer=
                                 tf.keras.initializers.TruncatedNormal(mean=0, stddev=1e-2),
@@ -88,8 +91,7 @@ def create_siamese_model(X_train):
     return model
 
 
-def train_model_net(X_train, y_train, X_val, y_val, iterations_num, batch_size, list_same, list_diff,
-                        siamese_model):
+def train_model_net(X_train, y_train, X_val, y_val, iterations_num, batch_size, siamese_model):
 
         pos = np.where(y_train == 1)[0]
         neg = np.where(y_train == 0)[0]
@@ -107,8 +109,13 @@ def train_model_net(X_train, y_train, X_val, y_val, iterations_num, batch_size, 
                 neg_batch = random.choices(neg_new, k=min(batch_size_per_class, len(neg_new)))
                 neg_new = np.array([x for x in neg_new if x not in neg_batch])
                 batch_idx = pos_batch + neg_batch
+                random.shuffle(batch_idx)
                 X = [X_train[0][batch_idx], X_train[1][batch_idx]]
                 y = y_train[batch_idx]
+
+                if (len(np.where(y==1)[0])/len(np.where(y==0)[0]) != 1):
+                    print('hi')
+                    continue
 
                 train_loss, train_acc = siamese_model.train_on_batch(X, y)
                 df_train_res = df_train_res.append(
@@ -122,11 +129,11 @@ def train_model_net(X_train, y_train, X_val, y_val, iterations_num, batch_size, 
                 {'epoch': epoch, 'loss': float(val_loss), 'accuracy': float(val_acc)}, ignore_index=True)
             print('epoch %s - validation loss, acc: %s, %s' % (epoch, float (val_loss), float (val_acc)))
 
-            if epoch % 2 == 0 and epoch != 0:
+            # if epoch % 2 == 0 and epoch != 0:
 
-                if (df_val_res[df_val_res['epoch'] == epoch]['accuracy']/ \
-                    df_val_res[df_val_res['epoch'] == epoch-2]['accuracy'])<1.01:
-                        break
+            # if (df_val_res[df_val_res['epoch'] == epoch]['accuracy']/ \
+            #     df_val_res[df_val_res['epoch'] == epoch-2]['accuracy'])<1.01:
+            #         break
 
         return df_val_res
 
