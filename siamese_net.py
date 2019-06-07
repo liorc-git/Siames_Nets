@@ -146,6 +146,6 @@ def train_model_net(X_train, Y_train, X_val, Y_val, X_test, y_test, iterations_n
                     test_loss, test_acc = siamese_model.evaluate ([X_test_3channels[0], X_test_3channels[1]], y_test)
                     break
             val_acc_prev = val_acc
-            conv_runtime = stop - start
+        conv_runtime = stop - start
         return df_train_results, df_validation_results, test_loss, test_acc, conv_runtime
 
