@@ -3,8 +3,7 @@ import random
 import numpy as np
 import math
 import pandas as pd
-import timeit
-
+import datetime
 
 def create_siamese_model(X_train):
     X_train_pair1 = tf.image.grayscale_to_rgb(X_train[0])
@@ -81,7 +80,7 @@ def train_model_net(X_train, Y_train, X_val, Y_val, X_test, y_test, iterations_n
         val_acc_prev = 0
         decrease_acc_num = 0  # for consecutive decrease in accuracy
 
-        start = timeit.default_timer()#start time for checking running time for all epochs until convergence
+        start = datetime.datetime.utcnow()#start time for checking running time for all epochs until convergence
         stop = 0
         for epoch in range(iterations_num):
             #shuffle each list indexes of identical and different pairs in order that ech batch will be different between epochs running
@@ -142,8 +141,8 @@ def train_model_net(X_train, Y_train, X_val, Y_val, X_test, y_test, iterations_n
                     decrease_acc_num += 1
                 else:
                     decrease_acc_num = 0
-                if epoch >= 1:# if decrease_acc_num >= 20:
-                    stop = timeit.default_timer()
+                if decrease_acc_num >= 20:
+                    stop = datetime.datetime.utcnow()
                     test_loss, test_acc = siamese_model.evaluate ([X_test_3channels[0], X_test_3channels[1]], y_test)
                     break
             val_acc_prev = val_acc
