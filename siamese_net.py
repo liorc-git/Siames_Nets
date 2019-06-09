@@ -9,7 +9,6 @@ import datetime
 
 def create_siamese_model(X_train):
     """
-
     :param X_train:
     :return: siamese model
     """
@@ -22,9 +21,7 @@ def create_siamese_model(X_train):
     siamese_net = tf.keras.models.Sequential()
     for layer in vggface.layers:
         siamese_net.add(layer)
-    print(siamese_net.summary())
     siamese_net.pop()
-    print(siamese_net.summary())
     for layer in siamese_net.layers:
         layer.trainable=False
 
@@ -44,7 +41,7 @@ def create_siamese_model(X_train):
     return model
 
 
-def train_model_net(X_train, Y_train, X_val, Y_val, X_test, y_test, iterations_num, batch_num, list_same, list_diff,
+def train_model_net(X_train, Y_train, X_test, y_test, iterations_num, batch_num, list_same, list_diff,
                         siamese_model):  # , support_set_size, final_momentum, momentum_slope, evaluate_each, model_name )
         """
         Description:
@@ -65,7 +62,7 @@ def train_model_net(X_train, Y_train, X_val, Y_val, X_test, y_test, iterations_n
         """
 
         #Adapt the validation and test pairs list to be with 3 channels , because input of RGB is expected by VGG16 model which is been used for our siamese model
-        X_val_3channels = [tf.image.grayscale_to_rgb(X_val[0]),tf.image.grayscale_to_rgb(X_val[1])]
+        # X_val_3channels = [tf.image.grayscale_to_rgb(X_val[0]),tf.image.grayscale_to_rgb(X_val[1])]
         X_test_3channels = [tf.image.grayscale_to_rgb(X_test[0]),tf.image.grayscale_to_rgb(X_test[1])]
 
         #calculate how many pairs will be from identical and different pairs=half of batch size
@@ -80,12 +77,14 @@ def train_model_net(X_train, Y_train, X_val, Y_val, X_test, y_test, iterations_n
 
         #produce dataframe with results
         df_train_results = pd.DataFrame(columns=['epoch', 'loss', 'accuracy'])
-        df_validation_results = pd.DataFrame(columns=['epoch', 'loss', 'accuracy'])
+        # df_validation_results = pd.DataFrame(columns=['epoch', 'loss', 'accuracy'])
+        df_test_results = pd.DataFrame (columns=['epoch', 'loss', 'accuracy','runtime'])
 
-        val_acc_prev = 0
-        decrease_acc_num = 0  # for consecutive decrease in accuracy
+        # val_acc_prev = 0
+        # decrease_acc_num = 0  # for consecutive decrease in accuracy
 
         start = datetime.datetime.utcnow()#start time for checking running time for all epochs until convergence
+        start_mid = start
         stop = 0
         for epoch in range(iterations_num):
             #shuffle each list indexes of identical and different pairs in order that ech batch will be different between epochs running
@@ -108,28 +107,34 @@ def train_model_net(X_train, Y_train, X_val, Y_val, X_test, y_test, iterations_n
                 label_batch = Y
                 train_loss, train_acc = siamese_model.train_on_batch(image_batch, label_batch)
                 df_train_results = df_train_results.append (
-                    {'epoch' : epoch, 'loss' : float (train_loss), 'accuracy' : float (train_acc)}, ignore_index=True)
+                    {'epoch': epoch, 'loss': float (train_loss), 'accuracy': float (train_acc)}, ignore_index=True)
                 print('Train loss, Train Accuracy at epoch %s, batch %s: %s, %s' % (epoch, index, float(train_loss), float(train_acc)))
 
-            # evaluate for validation and check if there are 20 consecutive decrease in validation accuracy
-            val_loss, val_acc = siamese_model.evaluate([X_val_3channels[0], X_val_3channels[1]], Y_val)
-            df_validation_results = df_validation_results.append(
-                {'epoch': epoch, 'loss': float(val_loss), 'accuracy': float(val_acc)}, ignore_index=True)
+            # # evaluate for validation and check if there are 20 consecutive decrease in validation accuracy
+            # val_loss, val_acc = siamese_model.evaluate([X_val_3channels[0], X_val_3channels[1]], Y_val)
+            # df_validation_results = df_validation_results.append(
+            #     {'epoch': epoch, 'loss': float(val_loss), 'accuracy': float(val_acc)}, ignore_index=True)
             test_loss,test_acc = siamese_model.evaluate([X_test_3channels[0], X_test_3channels[1]], y_test)
-            #if epoch % 20 == 0:
-            #    print('Validation loss, Validation Accuracy at epoch %s: %s, %s' % (epoch, float (val_loss), float (val_acc)))
-            if epoch > 0:
-                acc_decrease_per = (val_acc_prev - val_acc)/val_acc_prev
-                if acc_decrease_per > 0.01:
-                    decrease_acc_num += 1
-                else:
-                    decrease_acc_num = 0
-                if decrease_acc_num >= 20:
-                    stop = datetime.datetime.utcnow()
-                    predictions = siamese_model.predict([X_test_3channels[0], X_test_3channels[1]])
-                    test_loss, test_acc = siamese_model.evaluate([X_test_3channels[0], X_test_3channels[1]], y_test)
-                    break
-            val_acc_prev = val_acc
+            stop_mid = datetime.datetime.utcnow()
+            df_test_results = df_test_results.append (
+                {'epoch': epoch, 'loss': float(test_loss), 'accuracy': float(test_acc), 'runtime':stop_mid-start_mid}, ignore_index=True)
+            start_mid = stop_mid
+            # if epoch > 0:
+            #     acc_decrease_per = (val_acc_prev - val_acc)/val_acc_prev
+            #     if acc_decrease_per > 0.01:
+            #         decrease_acc_num += 1
+            #     else:
+            #         decrease_acc_num = 0
+            #     if decrease_acc_num >= 20:
+            #         stop = datetime.datetime.utcnow()
+            #         predictions = siamese_model.predict([X_test_3channels[0], X_test_3channels[1]])
+            #         test_loss, test_acc = siamese_model.evaluate([X_test_3channels[0], X_test_3channels[1]], y_test)
+            #         break
+            # val_acc_prev = val_acc
+
+            # stopping criteria
+            if epoch == 20:
+                break
         conv_runtime = stop - start
-        return df_train_results, df_validation_results, test_loss, test_acc, conv_runtime
+        return df_train_results, df_test_results, test_loss, test_acc, conv_runtime
 

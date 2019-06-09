@@ -95,7 +95,7 @@ def preprocess_data(jpg_path, df, train_or_test):
             y[index] = row[4]
     list_same_train = np.where(y == 1)[0]
     list_diff_train = np.where(y == 0)[0]
-    print("{train_or_test} data processing completed".format(train_or_test=train_or_test))
+    # print("{train_or_test} data processing completed".format(train_or_test=train_or_test))
     if train_or_test == 'Train':
         return (X, y, list_same_train, list_diff_train)
     return (X, y)
